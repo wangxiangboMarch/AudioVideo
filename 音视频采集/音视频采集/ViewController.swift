@@ -9,12 +9,16 @@ import UIKit
 import AVFoundation
 
 class ViewController: UIViewController {
-    /// 创建一个绘画
+    /// 创建一个会话
     fileprivate lazy var session = AVCaptureSession()
+    /// 视频数据输出口
     fileprivate var videoOutPut: AVCaptureVideoDataOutput?
+    /// 视频预览层
     fileprivate var previewLayer: AVCaptureVideoPreviewLayer?
-    
+    /// 视频的设备（前置摄像头还是后置或者其他）
     fileprivate var vedioInput: AVCaptureDeviceInput?
+    /// 音视频的导出
+    fileprivate var movieFileOutput: AVCaptureMovieFileOutput?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,8 +29,6 @@ class ViewController: UIViewController {
         // 初始化一个预览图层
         setupPreviewLayer()
     }
-    
-    
 }
 
 extension ViewController {
@@ -37,27 +39,41 @@ extension ViewController {
         guard let layer = self.previewLayer else {
             return
         }
+        // 如果存在预览层 就直接添加上
         view.layer.insertSublayer(layer, at: 0)
     }
-    
+    /// 停止采集
     @IBAction func stopCapturing(_ sender: UIButton) {
+        // 停止记录到文件
+        movieFileOutput?.stopRecording()
         // 停止采集
         session.stopRunning()
+        // 移除预览层
         previewLayer?.removeFromSuperlayer()
     }
     /// 切换摄像头
     @IBAction func rotateCamera(_ sender: UIButton) {
         
+        // 0.执行动画
+        let rotaionAnim = CATransition()
+        rotaionAnim.type =  .fade
+        rotaionAnim.subtype = .fromLeft
+        rotaionAnim.duration = 0.5
+        view.layer.add(rotaionAnim, forKey: nil)
+        
+        
+        // 拿到之前的设备
         guard let vedioInput = vedioInput else {
             return
         }
-        
+        // 计算现在要切换的设备（如果之前是前置现在就是后置）
         let position: AVCaptureDevice.Position = vedioInput.device.position == .front ? .back : .front
         // 获取对象的输入对象
         guard let device = AVCaptureDevice.DiscoverySession.init(deviceTypes: [.builtInWideAngleCamera], mediaType: .video, position: position).devices.first else { return }
         
-        // 1.3.通过前置摄像头创建输入设备
+        // 通过设备创建输入设备
         guard let newVideoInput = try? AVCaptureDeviceInput(device: device) else { return }
+        // 记录当前的设备
         self.vedioInput = newVideoInput
         // 移除之前的  添加新的
         session.beginConfiguration()
@@ -67,7 +83,6 @@ extension ViewController {
         }
         session.commitConfiguration()
     }
-    
 }
 
 extension ViewController {
@@ -134,15 +149,27 @@ extension ViewController {
         }
         session.commitConfiguration()
     }
-    
+    /// 存储音视频到文件
     fileprivate func setupMovieOutputFile() {
-        
+        // 获取文件的输出对象
         let fileOutput = AVCaptureMovieFileOutput()
-        
-        // 开始写入文件
+        self.movieFileOutput = fileOutput
+        // 创建文件路径
         let filePath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first! + "/app.mp4"
         
+        let fileUrl = URL(fileURLWithPath: filePath)
+        // 获取视频的连接
+        let connection = fileOutput.connection(with: .video)
+        // 设置视频的稳定模式
+        connection?.automaticallyAdjustsVideoMirroring = true
         
+        session.beginConfiguration()
+        if session.canAddOutput(fileOutput) {
+            session.addOutput(fileOutput)
+        }
+        session.commitConfiguration()
+        
+        fileOutput.startRecording(to: fileUrl, recordingDelegate: self)
     }
 }
 
@@ -158,6 +185,16 @@ extension ViewController : AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptu
         }
     }
     
+}
+
+extension ViewController: AVCaptureFileOutputRecordingDelegate {
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        print("写入文件完成")
+    }
+    
+    func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
+        print("开始写入文件")
+    }
 }
 
 
