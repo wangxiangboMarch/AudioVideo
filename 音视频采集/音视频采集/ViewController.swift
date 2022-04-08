@@ -196,28 +196,3 @@ extension ViewController: AVCaptureFileOutputRecordingDelegate {
         print("开始写入文件")
     }
 }
-
-
-/**
- 
- <key>NSCameraUsageDescription</key>
- <string>使用相机</string>
- 
- @available(iOS 7.0, *)
- open class func requestAccess(for mediaType: AVMediaType, completionHandler handler: @escaping (Bool) -> Void)
- 
- @available(iOS 7.0, *)
- open class func authorizationStatus(for mediaType: AVMediaType) -> AVAuthorizationStatus
- public enum AVAuthorizationStatus : Int {
- //用户尚未授予或拒绝该权限，
- case notDetermined = 0
- //不允许用户访问媒体捕获设备。这个状态通常是看不到的：用于发现设备的`AVCaptureDevice`类方法不会返回用户被限制访问的设备。
- case restricted = 1
- //用户已经明确拒绝了应用访问捕获设备
- case denied = 2
- //用户授予应用访问捕获设备的权限
- case authorized = 3
- }
- 
- 
- */
