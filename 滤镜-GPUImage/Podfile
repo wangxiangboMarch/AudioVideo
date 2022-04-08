@@ -1,0 +1,9 @@
+source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '12.0'
+
+target '滤镜-GPUImage' do
+  use_frameworks!
+  pod 'GPUImage'
+  
+
+end
