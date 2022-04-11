@@ -1,0 +1,16 @@
+PODS:
+  - GPUImage (0.1.7)
+
+DEPENDENCIES:
+  - GPUImage
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - GPUImage
+
+SPEC CHECKSUMS:
+  GPUImage: 733a5f0fab92df9de1c37ba9df520a833ccb406d
+
+PODFILE CHECKSUM: b9a64a94d177018bac5a2d04ba756e2542448e70
+
+COCOAPODS: 1.11.3
